@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const LeadSchema = new mongoose.Schema(
     {
         state: { type: String, trim: true, index: true },
+        loan_amount: { type: Number, min: 0 },
         first_name: { type: String, trim: true, required: true },
         last_name: { type: String, trim: true, required: true },
         address: { type: String, trim: true },
