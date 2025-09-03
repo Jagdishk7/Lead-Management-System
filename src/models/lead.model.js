@@ -1,9 +1,15 @@
 const mongoose = require('mongoose');
+const states = require('../constants/states.json');
+
+// Extract only the codes
+const stateCodes = states.map(s => s.code);
 
 // Lowercase field names as requested
 const LeadSchema = new mongoose.Schema(
     {
-        state: { type: String, trim: true, index: true },
+        state: {
+            type: String, trim: true, index: true, enum: stateCodes
+        },
         loan_amount: { type: Number, min: 0 },
         first_name: { type: String, trim: true, required: true },
         last_name: { type: String, trim: true, required: true },
