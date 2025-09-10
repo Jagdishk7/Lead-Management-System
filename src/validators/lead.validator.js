@@ -30,4 +30,14 @@ const createLeadSchema = Joi.object({
     account_number: Joi.string().pattern(digits).min(4).max(20).allow('', null)
 });
 
-module.exports = { createLeadSchema };
+const listLeadsQuerySchema = Joi.object({
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(200).default(20),
+    q: Joi.string().max(200).allow('', null)
+});
+
+const idParamSchema = Joi.object({
+    id: Joi.string().hex().length(24).required()
+});
+
+module.exports = { createLeadSchema, listLeadsQuerySchema, idParamSchema };

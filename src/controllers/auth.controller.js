@@ -1,3 +1,8 @@
+// Auth controller
+// - login: validates user credentials, issues access/refresh cookies
+// - logout: clears cookies
+// - me: returns current user based on access token cookie
+// - refresh: rotates access/refresh using the refresh cookie
 const createError = require('http-errors');
 const {
   issueAccessToken,
@@ -32,6 +37,7 @@ function refreshCookieOptions() {
   };
 }
 
+/** Log in and set HttpOnly access/refresh cookies */
 async function login(req, res, next) {
   try {
     const { email, password } = req.body || {};
@@ -57,6 +63,7 @@ async function login(req, res, next) {
   }
 }
 
+/** Clear auth cookies and end session on the client */
 function logout(req, res) {
   const accessName = process.env.ACCESS_COOKIE_NAME || 'access_token';
   const refreshName = process.env.REFRESH_COOKIE_NAME || 'refresh_token';
@@ -65,6 +72,7 @@ function logout(req, res) {
   res.status(204).send();
 }
 
+/** Return who is logged in (if any) using access token cookie */
 function me(req, res) {
   const name = process.env.ACCESS_COOKIE_NAME || 'access_token';
   const token = (req.headers.cookie || '').split(';').find(c => c.trim().startsWith(name + '='));
@@ -75,6 +83,7 @@ function me(req, res) {
   res.json({ user: { email: payload.email || null, role: payload.role } });
 }
 
+/** Rotate tokens using the refresh cookie; also checks user is still active */
 async function refresh(req, res, next) {
   try {
     const name = process.env.REFRESH_COOKIE_NAME || 'refresh_token';

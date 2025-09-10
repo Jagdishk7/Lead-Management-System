@@ -1,3 +1,6 @@
+// Auth middleware
+// - requireAuth: verifies JWT access token from Authorization header or cookie
+// - requireRole: ensures the authenticated user has one of the allowed roles
 const cookie = require('cookie');
 const createError = require('http-errors');
 const { verifyAccess } = require('../utils/session');

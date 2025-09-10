@@ -1,3 +1,5 @@
+// Main Express application setup for the API
+// Sets security headers, CORS, compression, logging and mounts routes under /api/v1
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -20,7 +22,9 @@ if (process.env.CORS_ORIGIN) {
   app.use(cors());
 }
 app.use(compression());
+// Parse JSON bodies with a small safety limit
 app.use(express.json({ limit: '100kb' }));
+// HTTP request logger
 app.use(morgan('combined'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));

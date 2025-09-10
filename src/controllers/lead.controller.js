@@ -1,5 +1,7 @@
+// Lead controller: thin layer calling the lead service
 const { createLead, listLeads, getLeadById } = require('../services/lead.service');
 
+/** Create a new lead from landing page payload */
 async function create(req, res, next) {
     try {
         const lead = await createLead(req.body);
@@ -9,6 +11,7 @@ async function create(req, res, next) {
     }
 }
 
+/** Return paginated leads (admin area) */
 async function list(req, res, next) {
     try {
         const page = parseInt(req.query.page || '1', 10);
@@ -21,6 +24,7 @@ async function list(req, res, next) {
     }
 }
 
+/** Get a single lead by id */
 async function getOne(req, res, next) {
     try {
         const lead = await getLeadById(req.params.id);

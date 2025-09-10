@@ -1,3 +1,5 @@
+// Application bootstrapper
+// - Loads environment, connects MongoDB, and starts the HTTP server
 require('dotenv').config();
 const app = require('./app');
 const { connectDB } = require('./config/db');

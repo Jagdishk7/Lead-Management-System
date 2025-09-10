@@ -1,26 +1,12 @@
+// User controller for admin operations (list/get/create)
 const createError = require('http-errors');
-const Joi = require('joi');
 const { createUser, findByEmail } = require('../services/user.service');
 const User = require('../models/user.model');
 
-const listQuerySchema = Joi.object({
-  page: Joi.number().integer().min(1).default(1),
-  limit: Joi.number().integer().min(1).max(200).default(20),
-  q: Joi.string().max(200).allow('', null)
-});
-
-const createSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(8).max(128).required(),
-  name: Joi.string().max(120).allow('', null),
-  role: Joi.string().valid('super_admin', 'admin', 'agent').optional()
-});
-
+/** Paginated list of users (password hashes omitted) */
 async function list(req, res, next) {
   try {
-    const { value, error } = listQuerySchema.validate(req.query, { abortEarly: false, stripUnknown: true });
-    if (error) throw createError(400, { message: 'Validation error', details: error.details });
-    const { page, limit, q } = value;
+    const { page, limit, q } = req.query;
     const filter = {};
     if (q) {
       const regex = new RegExp(q, 'i');
@@ -41,6 +27,7 @@ async function list(req, res, next) {
   }
 }
 
+/** Return a single user by id (password hash omitted) */
 async function getOne(req, res, next) {
   try {
     const user = await User.findById(req.params.id, { password_hash: 0 }).lean();
@@ -51,14 +38,13 @@ async function getOne(req, res, next) {
   }
 }
 
+/** Create a user; admins can only create agents, super_admin can set any role */
 async function create(req, res, next) {
   try {
     const actor = req.user;
     if (!actor) throw createError(401, 'Unauthorized');
     if (!['super_admin', 'admin'].includes(actor.role)) throw createError(403, 'Forbidden');
-
-    const { error, value } = createSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
-    if (error) throw createError(400, { message: 'Validation error', details: error.details });
+    const value = req.body;
 
     // Only super_admin can set arbitrary roles; admins create agents
     let role = 'agent';
@@ -76,4 +62,3 @@ async function create(req, res, next) {
 }
 
 module.exports = { list, getOne, create };
-

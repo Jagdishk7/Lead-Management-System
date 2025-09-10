@@ -1,3 +1,5 @@
+// Lead schema for capturing loan interest submissions from landing pages
+// NOTE: Consider additional protection for sensitive fields (e.g., encryption/tokenization)
 const mongoose = require('mongoose');
 const states = require('../constants/states.json');
 
@@ -15,9 +17,9 @@ const LeadSchema = new mongoose.Schema(
         last_name: { type: String, trim: true, required: true },
         address: { type: String, trim: true },
         city: { type: String, trim: true },
-        email: { type: String, trim: true, lowercase: true, match: /.+\@.+\..+/ },
+        email: { type: String, trim: true, lowercase: true, match: /.+\@.+\..+/ }, // basic format check
         zip: { type: String, trim: true, index: true },
-        dob: { type: String, trim: true },           // e.g. MM/DD/YYYY if you store full
+        dob: { type: String, trim: true },           // e.g., MM/DD/YYYY if stored as a whole
         ssn: { type: String, trim: true },           // consider encryption/tokenization
         ssn_1: { type: String, trim: true },
         ssn_2: { type: String, trim: true },
@@ -31,12 +33,12 @@ const LeadSchema = new mongoose.Schema(
         bank_name: { type: String, trim: true },
         routing_number: { type: String, trim: true },
         account_number: { type: String, trim: true },
-        sitename: { type: String, trim: true, index: true } // Added field
+        sitename: { type: String, trim: true, index: true } // source site/landing page
     },
     { timestamps: true }
 );
 
-// Helpful indexes
+// Helpful indexes for common queries
 LeadSchema.index({ email: 1 });
 LeadSchema.index({ phone: 1 });
 LeadSchema.index({ createdAt: -1 });

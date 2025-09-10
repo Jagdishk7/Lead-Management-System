@@ -1,21 +1,26 @@
+// Password hashing helpers using Node's crypto.scrypt
+// - No external deps; parameters tuned for reasonable security by default
 const crypto = require('crypto');
 
 // scrypt password hashing helpers (no external deps)
 
-const N = 16384; // CPU/memory cost
+// scrypt parameters
+const N = 16384; // CPU/memory cost (2^14)
 const r = 8;     // block size
 const p = 1;     // parallelization
-const keylen = 64;
+const keylen = 64; // derived key length
 
 function toB64(buf) { return Buffer.from(buf).toString('base64'); }
 function fromB64(str) { return Buffer.from(str, 'base64'); }
 
+/** Hash a plaintext password and return a self-describing string */
 function hashPassword(password) {
   const salt = crypto.randomBytes(16);
   const hash = crypto.scryptSync(password, salt, keylen, { N, r, p });
   return `scrypt$N=${N}$r=${r}$p=${p}$${toB64(salt)}$${toB64(hash)}`;
 }
 
+/** Verify a plaintext password against the stored scrypt hash */
 function verifyPassword(password, stored) {
   try {
     const parts = stored.split('$');
@@ -33,4 +38,3 @@ function verifyPassword(password, stored) {
 }
 
 module.exports = { hashPassword, verifyPassword };
-
