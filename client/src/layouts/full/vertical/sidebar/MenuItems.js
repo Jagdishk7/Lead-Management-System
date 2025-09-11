@@ -65,12 +65,12 @@ const Menuitems = [
           icon: IconBuildingBank,
           href: '/zippycash/ach',
         },
-        {
-          id: uniqueId(),
-          title: 'KYC Verifications',
-          icon: IconShieldCheck,
-          href: '/l1',
-        },
+        // {
+        //   id: uniqueId(),
+        //   title: 'KYC Verifications',
+        //   icon: IconShieldCheck,
+        //   href: '/l1',
+        // },
         // {
         //   id: uniqueId(),
         //   title: 'Level 1.1',

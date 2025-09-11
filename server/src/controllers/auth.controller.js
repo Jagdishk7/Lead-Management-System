@@ -10,7 +10,8 @@ const {
   verifyAccess,
   verifyRefresh,
   ACCESS_TOKEN_TTL,
-  REFRESH_TOKEN_TTL
+  REFRESH_TOKEN_TTL,
+  REFRESH_TOKEN_REMEMBER_TTL
 } = require('../utils/session');
 const { findByEmail, findById, recordLogin } = require('../services/user.service');
 const { verifyPassword } = require('../utils/password');
@@ -26,21 +27,23 @@ function accessCookieOptions() {
   };
 }
 
-function refreshCookieOptions() {
+function refreshCookieOptions(remember = false) {
   const isProd = process.env.NODE_ENV === 'production';
-  return {
+  const base = {
     httpOnly: true,
     secure: !!(isProd || process.env.COOKIE_SECURE === 'true'),
     sameSite: process.env.COOKIE_SAMESITE || 'lax',
     path: '/api/v1/auth/refresh',
-    maxAge: REFRESH_TOKEN_TTL * 1000
   };
+  // Always set explicit Max-Age based on remember flag
+  base.maxAge = (remember ? (REFRESH_TOKEN_REMEMBER_TTL || REFRESH_TOKEN_TTL) : REFRESH_TOKEN_TTL) * 1000;
+  return base;
 }
 
 /** Log in and set HttpOnly access/refresh cookies */
 async function login(req, res, next) {
   try {
-    const { email, password } = req.body || {};
+    const { email, password, remember } = req.body || {};
     if (!email || !password) throw createError(400, 'Email and password are required');
 
     const user = await findByEmail(email);
@@ -51,12 +54,12 @@ async function login(req, res, next) {
     await recordLogin(user._id);
 
     const access = issueAccessToken({ sub: String(user._id), role: user.role, email: user.email });
-    const refresh = issueRefreshToken({ sub: String(user._id), role: user.role });
+    const refresh = issueRefreshToken({ sub: String(user._id), role: user.role, remember: !!remember });
 
     const accessName = process.env.ACCESS_COOKIE_NAME || 'access_token';
     const refreshName = process.env.REFRESH_COOKIE_NAME || 'refresh_token';
     res.cookie(accessName, access, accessCookieOptions());
-    res.cookie(refreshName, refresh, refreshCookieOptions());
+    res.cookie(refreshName, refresh, refreshCookieOptions(!!remember));
     res.json({ user: { email: user.email, role: user.role, name: user.name || null } });
   } catch (err) {
     next(err);
@@ -96,13 +99,14 @@ async function refresh(req, res, next) {
     const user = await findById(payload.sub);
     if (!user || user.status !== 'active') throw createError(401, 'Unauthorized');
 
+    const remember = !!payload.remember;
     const access = issueAccessToken({ sub: String(user._id), role: user.role, email: user.email });
-    const refresh = issueRefreshToken({ sub: String(user._id), role: user.role });
+    const refresh = issueRefreshToken({ sub: String(user._id), role: user.role, remember });
 
     const accessName = process.env.ACCESS_COOKIE_NAME || 'access_token';
     const refreshName = process.env.REFRESH_COOKIE_NAME || 'refresh_token';
     res.cookie(accessName, access, accessCookieOptions());
-    res.cookie(refreshName, refresh, refreshCookieOptions());
+    res.cookie(refreshName, refresh, refreshCookieOptions(remember));
     res.json({ user: { email: user.email, role: user.role, name: user.name || null } });
   } catch (err) {
     next(err);

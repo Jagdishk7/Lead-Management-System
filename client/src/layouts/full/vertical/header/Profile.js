@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import {
   Box,
   Menu,
@@ -13,17 +13,31 @@ import * as dropdownData from './data';
 
 import { IconMail } from '@tabler/icons-react';
 import { Stack } from '@mui/system';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from 'src/store/auth/authSlice';
 
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 import unlimitedImg from 'src/assets/images/backgrounds/unlimited-bg.png';
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const user = useSelector((s) => s.auth.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const handleClick2 = (event) => {
     setAnchorEl2(event.currentTarget);
   };
   const handleClose2 = () => {
     setAnchorEl2(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout());
+    } finally {
+      handleClose2();
+      navigate('/auth/login');
+    }
   };
 
   return (
@@ -43,12 +57,11 @@ const Profile = () => {
       >
         <Avatar
           src={ProfileImg}
-          alt={ProfileImg}
-          sx={{
-            width: 35,
-            height: 35,
-          }}
-        />
+          alt={user?.email || 'profile'}
+          sx={{ width: 35, height: 35 }}
+        >
+          {!ProfileImg && (user?.email?.[0]?.toUpperCase() || 'U')}
+        </Avatar>
       </IconButton>
       {/* ------------------------------------------- */}
       {/* Message Dropdown */}
@@ -70,13 +83,15 @@ const Profile = () => {
       >
         <Typography variant="h5">User Profile</Typography>
         <Stack direction="row" py={3} spacing={2} alignItems="center">
-          <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
+          <Avatar src={ProfileImg} alt={user?.email || 'profile'} sx={{ width: 95, height: 95 }}>
+            {!ProfileImg && (user?.email?.[0]?.toUpperCase() || 'U')}
+          </Avatar>
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-              Mathew Anderson
+              {user?.name || user?.email || 'User'}
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
-              Designer
+              {user?.role ? user.role.replace('_', ' ') : '—'}
             </Typography>
             <Typography
               variant="subtitle2"
@@ -86,7 +101,7 @@ const Profile = () => {
               gap={1}
             >
               <IconMail width={15} height={15} />
-              info@modernize.com
+              {user?.email || '—'}
             </Typography>
           </Box>
         </Stack>
@@ -158,7 +173,7 @@ const Profile = () => {
               <img src={unlimitedImg} alt="unlimited" className="signup-bg"></img>
             </Box>
           </Box>
-          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth>
+          <Button onClick={handleLogout} variant="outlined" color="primary" fullWidth>
             Logout
           </Button>
         </Box>

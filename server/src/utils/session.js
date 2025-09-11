@@ -16,7 +16,10 @@ function seconds(name, def) {
 
 // Token lifetimes (seconds)
 const ACCESS_TOKEN_TTL = seconds('ACCESS_TOKEN_TTL_SECONDS', 900); // 15m
-const REFRESH_TOKEN_TTL = seconds('REFRESH_TOKEN_TTL_SECONDS', 1209600); // 14d
+// Default refresh when not remembered: 24h
+const REFRESH_TOKEN_TTL = seconds('REFRESH_TOKEN_TTL_SECONDS', 86400); // 24h
+// Remembered refresh default: 7d (set to 2592000 for 30d via env)
+const REFRESH_TOKEN_REMEMBER_TTL = seconds('REFRESH_TOKEN_REMEMBER_TTL_SECONDS', 604800); // 7d
 
 /** Create a short-lived access token with minimal claims */
 function issueAccessToken({ sub, role, email }) {
@@ -25,11 +28,12 @@ function issueAccessToken({ sub, role, email }) {
   return jwt.sign(payload, secret, { expiresIn: ACCESS_TOKEN_TTL });
 }
 
-/** Create a refresh token; includes a type guard to avoid misuse */
-function issueRefreshToken({ sub, role }) {
+/** Create a refresh token; includes a type guard and remember flag */
+function issueRefreshToken({ sub, role, remember = false, ttlSeconds } = {}) {
   const secret = requiredEnv('REFRESH_TOKEN_SECRET');
-  const payload = { sub, role, type: 'refresh' };
-  return jwt.sign(payload, secret, { expiresIn: REFRESH_TOKEN_TTL });
+  const payload = { sub, role, type: 'refresh', remember: !!remember };
+  const expiresIn = ttlSeconds || (remember ? REFRESH_TOKEN_REMEMBER_TTL : REFRESH_TOKEN_TTL);
+  return jwt.sign(payload, secret, { expiresIn });
 }
 
 /** Verify access token; returns payload or null */
@@ -60,5 +64,6 @@ module.exports = {
   verifyAccess,
   verifyRefresh,
   ACCESS_TOKEN_TTL,
-  REFRESH_TOKEN_TTL
+  REFRESH_TOKEN_TTL,
+  REFRESH_TOKEN_REMEMBER_TTL
 };

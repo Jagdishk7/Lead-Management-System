@@ -4,6 +4,7 @@ import RTL from './layouts/full/shared/customizer/RTL';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { RouterProvider } from 'react-router';
 import router from './routes/Router';
+import AppInit from './components/auth/AppInit';
 
 function App() {
   const theme = ThemeSettings();
@@ -13,6 +14,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <RTL direction={customizer.activeDir}>
         <CssBaseline />
+        <AppInit />
         <RouterProvider router={router} />
       </RTL>
     </ThemeProvider>

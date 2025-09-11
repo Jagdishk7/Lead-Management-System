@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -8,7 +8,9 @@ import {
   Stack,
   Divider,
 } from '@mui/material';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../../../store/auth/authSlice';
 
 import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheckbox';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
@@ -16,7 +18,24 @@ import CustomFormLabel from '../../../components/forms/theme-elements/CustomForm
 
 import AuthSocialButtons from './AuthSocialButtons';
 
-const AuthLogin = ({ title, subtitle, subtext }) => (
+const AuthLogin = ({ title, subtitle, subtext }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((s) => s.auth);
+  const [remember, setRemember] = useState(true);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    console.log("data : ", { email, password });
+    const res = await dispatch(login({ email, password, remember }));
+    if (res.type.endsWith('fulfilled')) {
+      navigate('/');
+    }
+  };
+
+  return (
   <>
     {title ? (
       <Typography fontWeight="700" variant="h3" mb={1}>
@@ -42,23 +61,23 @@ const AuthLogin = ({ title, subtitle, subtext }) => (
       </Divider>
     </Box> */}
 
-    <Stack>
+    <Stack component="form" onSubmit={onSubmit}>
       <Box>
-        <CustomFormLabel htmlFor="username">Username</CustomFormLabel>
-        <CustomTextField id="username" variant="outlined" fullWidth />
+        <CustomFormLabel htmlFor="email">Email</CustomFormLabel>
+        <CustomTextField id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} variant="outlined" fullWidth required />
       </Box>
       <Box>
         <CustomFormLabel htmlFor="password">Password</CustomFormLabel>
-        <CustomTextField id="password" type="password" variant="outlined" fullWidth />
+        <CustomTextField id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} variant="outlined" fullWidth required />
       </Box>
       <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
         <FormGroup>
           <FormControlLabel
-            control={<CustomCheckbox defaultChecked />}
-            label="Remeber this Device"
+            control={<CustomCheckbox checked={remember} onChange={(e) => setRemember(e.target.checked)} />}
+            label="Remember this device"
           />
         </FormGroup>
-        <Typography
+        {/* <Typography
           component={Link}
           to="/auth/forgot-password"
           fontWeight="500"
@@ -68,24 +87,27 @@ const AuthLogin = ({ title, subtitle, subtext }) => (
           }}
         >
           Forgot Password ?
-        </Typography>
+        </Typography> */}
       </Stack>
+      {error ? (
+        <Typography color="error" variant="body2" mb={1}>{error}</Typography>
+      ) : null}
+      <Box>
+        <Button
+          color="primary"
+          variant="contained"
+          size="large"
+          fullWidth
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? 'Signing in...' : 'Sign In'}
+        </Button>
+      </Box>
     </Stack>
-    <Box>
-      <Button
-        color="primary"
-        variant="contained"
-        size="large"
-        fullWidth
-        component={Link}
-        to="/"
-        type="submit"
-      >
-        Sign In
-      </Button>
-    </Box>
     {/* {subtitle} */}
   </>
 );
+};
 
 export default AuthLogin;

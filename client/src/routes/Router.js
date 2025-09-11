@@ -1,12 +1,13 @@
 import React, { lazy } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
+import RequireAuth from './RequireAuth';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
 
-const Login = Loadable(lazy(() => import('../views/authentication/auth2/Login2')));
+const Login = Loadable(lazy(() => import('../views/authentication/auth1/Login')));
 
 /* ****Pages***** */
 const SamplePage = Loadable(lazy(() => import('../views/sample-page/SamplePage')))
@@ -23,18 +24,22 @@ const WebsiteAchEdit = Loadable(lazy(() => import('../views/websites/zippycash/a
 const Router = [
   {
     path: '/',
-    element: <FullLayout />,
+    element: <RequireAuth roles={["admin", "super_admin"]} />,
     children: [
       { path: '/', element: <Navigate to="/sample-page" /> },
-      { path: '/sample-page', exact: true, element: <SamplePage /> },
-      { path: '/zippycash/leads', exact: true, element: <WebsiteLeadsPage /> },
-      { path: '/zippycash/ach', exact: true, element: <WebsiteAchPage /> },
-      /* ✅ View / Edit pages */
-      { path: '/zippycash/leads/:id', element: <WebsiteLeadView /> },
-      { path: '/zippycash/leads/:id/edit', element: <WebsiteLeadEdit /> },
-      { path: '/zippycash/ach/:id', element: <WebsiteAchView /> },
-      { path: '/zippycash/ach/:id/edit', element: <WebsiteAchEdit /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
+      {
+        element: <FullLayout />,
+        children: [
+          { path: '/sample-page', exact: true, element: <SamplePage /> },
+          { path: '/zippycash/leads', exact: true, element: <WebsiteLeadsPage /> },
+          { path: '/zippycash/leads/:id', element: <WebsiteLeadView /> },
+          { path: '/zippycash/leads/:id/edit', element: <WebsiteLeadEdit /> },
+          { path: '/zippycash/ach', exact: true, element: <WebsiteAchPage /> },
+          { path: '/zippycash/ach/:id', element: <WebsiteAchView /> },
+          { path: '/zippycash/ach/:id/edit', element: <WebsiteAchEdit /> },
+          { path: '*', element: <Navigate to="/auth/404" /> },
+        ],
+      },
     ],
   },
   {
