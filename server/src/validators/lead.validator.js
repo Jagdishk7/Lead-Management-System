@@ -4,6 +4,10 @@ const phoneRegex = /^[0-9\-+()\s]{7,20}$/;
 const digits = /^\d+$/;
 
 const createLeadSchema = Joi.object({
+    // Either reference by website_id or stable website_code
+    website_id: Joi.string().hex().length(24),
+    website_code: Joi.string().lowercase().pattern(/^[a-z0-9_]+$/).min(2).max(50),
+
     state: Joi.string().max(64).allow('', null),
     first_name: Joi.string().max(100).required(),
     last_name: Joi.string().max(100).required(),
@@ -28,12 +32,19 @@ const createLeadSchema = Joi.object({
     bank_name: Joi.string().max(120).allow('', null),
     routing_number: Joi.string().pattern(digits).min(9).max(9).allow('', null),
     account_number: Joi.string().pattern(digits).min(4).max(20).allow('', null)
-});
+}).xor('website_id', 'website_code');
 
 const listLeadsQuerySchema = Joi.object({
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(200).default(20),
-    q: Joi.string().max(200).allow('', null)
+    q: Joi.string().max(200).allow('', null),
+    website_id: Joi.string().hex().length(24).allow(null, ''),
+    website_code: Joi.string().lowercase().pattern(/^[a-z0-9_]+$/).min(2).max(50).allow(null, ''),
+    website_type: Joi.string().valid('website', 'landing_page').allow(null, ''),
+    // Date filtering (single day or range)
+    date: Joi.date().iso().allow(null, ''),
+    created_from: Joi.date().iso().allow(null, ''),
+    created_to: Joi.date().iso().allow(null, '')
 });
 
 const idParamSchema = Joi.object({

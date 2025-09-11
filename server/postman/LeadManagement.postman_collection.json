@@ -1,0 +1,228 @@
+{
+  "info": {
+    "name": "Lead Management API (Local)",
+    "_postman_id": "7f1e3b47-6c9b-4f3e-9c0f-b4ff1c7a9a00",
+    "description": "Cookie-based auth, Websites CRUD, and Leads CRUD with website/date filters.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1" },
+    { "key": "websiteId", "value": "000000000000000000000000" },
+    { "key": "leadId", "value": "000000000000000000000000" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (sets cookies)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"abcd@1234\",\n  \"remember\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Me (who am I?)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Refresh (rotate tokens)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Logout (clear cookies)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Websites",
+      "item": [
+        {
+          "name": "Create Website",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/websites", "host": ["{{baseUrl}}"], "path": ["websites"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Zippy Cash\",\n  \"code\": \"zippy_cash\",\n  \"type\": \"landing_page\",\n  \"domain\": \"zippycash.local\",\n  \"base_url\": \"https://zippycash.local\",\n  \"status\": \"active\",\n  \"aliases\": [\"zippy\", \"zippy_cash_lp\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "List Websites",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/websites?page=1&limit=20&q=&type=&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["websites"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "q", "value": "" },
+                { "key": "type", "value": "" },
+                { "key": "status", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Website by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/websites/{{websiteId}}", "host": ["{{baseUrl}}"], "path": ["websites", "{{websiteId}}"] }
+          }
+        },
+        {
+          "name": "Update Website",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/websites/{{websiteId}}", "host": ["{{baseUrl}}"], "path": ["websites", "{{websiteId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"domain\": \"zippycash.example\",\n  \"status\": \"active\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Website (soft)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/websites/{{websiteId}}", "host": ["{{baseUrl}}"], "path": ["websites", "{{websiteId}}"] }
+          }
+        },
+        {
+          "name": "Delete Website (hard)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/websites/{{websiteId}}?hard=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["websites", "{{websiteId}}"],
+              "query": [{ "key": "hard", "value": "true" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leads",
+      "item": [
+        {
+          "name": "Create Lead (by website_code)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/leads", "host": ["{{baseUrl}}"], "path": ["leads"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"website_code\": \"zippy_cash\",\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"phone\": \"+1 (555) 123-4567\",\n  \"state\": \"CA\",\n  \"city\": \"San Jose\",\n  \"zip\": \"95112\",\n  \"address\": \"123 Market St\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Lead (by website_id)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/leads", "host": ["{{baseUrl}}"], "path": ["leads"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"website_id\": \"{{websiteId}}\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Smith\",\n  \"email\": \"john.smith@example.com\",\n  \"phone\": \"+1 (555) 222-3333\",\n  \"state\": \"NY\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Leads (basic pagination + search)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/leads?page=1&limit=20&q=doe",
+              "host": ["{{baseUrl}}"],
+              "path": ["leads"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "q", "value": "doe" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Leads (ZippyCash today)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/leads?website_code=zippy_cash&date=2025-09-11&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["leads"],
+              "query": [
+                { "key": "website_code", "value": "zippy_cash" },
+                { "key": "date", "value": "2025-09-11" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Leads (Landing pages in date range)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/leads?website_type=landing_page&created_from=2025-09-01&created_to=2025-09-10",
+              "host": ["{{baseUrl}}"],
+              "path": ["leads"],
+              "query": [
+                { "key": "website_type", "value": "landing_page" },
+                { "key": "created_from", "value": "2025-09-01" },
+                { "key": "created_to", "value": "2025-09-10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Lead by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/leads/{{leadId}}", "host": ["{{baseUrl}}"], "path": ["leads", "{{leadId}}"] }
+          }
+        },
+        {
+          "name": "Update Lead (reassign + edit)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/leads/{{leadId}}", "host": ["{{baseUrl}}"], "path": ["leads", "{{leadId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"website_code\": \"zippy_cash\",\n  \"phone\": \"+1 (555) 999-0000\",\n  \"city\": \"Sunnyvale\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Lead",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/leads/{{leadId}}", "host": ["{{baseUrl}}"], "path": ["leads", "{{leadId}}"] }
+          }
+        }
+      ]
+    }
+  ],
+  "protocolProfileBehavior": { "disableBodyPruning": true }
+}
+

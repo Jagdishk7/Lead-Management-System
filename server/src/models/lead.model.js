@@ -9,6 +9,9 @@ const stateCodes = states.map(s => s.code);
 // Lowercase field names as requested
 const LeadSchema = new mongoose.Schema(
     {
+        // Reference to website/landing page
+        website_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Website', index: true },
+
         state: {
             type: String, trim: true, index: true, enum: stateCodes
         },
@@ -33,6 +36,7 @@ const LeadSchema = new mongoose.Schema(
         bank_name: { type: String, trim: true },
         routing_number: { type: String, trim: true },
         account_number: { type: String, trim: true },
+        // legacy: kept for backward compatibility
         sitename: { type: String, trim: true, index: true } // source site/landing page
     },
     { timestamps: true }

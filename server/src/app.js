@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const createError = require('http-errors');
 
 const leadRoutes = require('./routes/lead.routes');
+const websiteRoutes = require('./routes/website.routes');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const errorHandler = require('./middlewares/error');
@@ -32,6 +33,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/leads', leadRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/websites', websiteRoutes);
 
 // 404
 app.use((req, res, next) => next(createError(404, 'Route not found')));
