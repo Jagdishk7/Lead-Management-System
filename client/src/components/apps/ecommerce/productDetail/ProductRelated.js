@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Box, Stack, Typography, CardContent, Rating, Skeleton } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProducts } from '../../../../store/apps/eCommerce/EcommerceSlice';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import BlankCard from '../../../shared/BlankCard';
 import Grid from '@mui/material/Grid2';
 

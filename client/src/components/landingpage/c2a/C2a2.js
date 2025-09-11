@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import { styled } from '@mui/material';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 import c2aImg from 'src/assets/images/landingpage/background/c2a.png';
 import GuaranteeCard from './GuaranteeCard';

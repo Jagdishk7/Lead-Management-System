@@ -1,6 +1,6 @@
 import { styled, Container, Box, useTheme } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { Outlet } from 'react-router';
+import { Outlet } from 'react-router-dom';
 
 import Header from './vertical/header/Header';
 import HorizontalHeader from '../full/horizontal/header/Header';

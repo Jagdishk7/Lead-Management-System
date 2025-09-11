@@ -8,7 +8,7 @@ import {
   Stack,
   Divider,
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../../store/auth/authSlice';
 

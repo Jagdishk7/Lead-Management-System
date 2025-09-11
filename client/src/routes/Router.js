@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { Navigate, createBrowserRouter } from 'react-router';
+import { Navigate, createBrowserRouter } from 'react-router-dom';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import RequireAuth from './RequireAuth';
 
@@ -26,17 +26,17 @@ const Router = [
     path: '/',
     element: <RequireAuth roles={["admin", "super_admin"]} />,
     children: [
-      { path: '/', element: <Navigate to="/sample-page" /> },
       {
         element: <FullLayout />,
         children: [
-          { path: '/sample-page', exact: true, element: <SamplePage /> },
-          { path: '/zippycash/leads', exact: true, element: <WebsiteLeadsPage /> },
-          { path: '/zippycash/leads/:id', element: <WebsiteLeadView /> },
-          { path: '/zippycash/leads/:id/edit', element: <WebsiteLeadEdit /> },
-          { path: '/zippycash/ach', exact: true, element: <WebsiteAchPage /> },
-          { path: '/zippycash/ach/:id', element: <WebsiteAchView /> },
-          { path: '/zippycash/ach/:id/edit', element: <WebsiteAchEdit /> },
+          { index: true, element: <Navigate to="/sample-page" /> },
+          { path: 'sample-page', element: <SamplePage /> },
+          { path: 'zippycash/leads', element: <WebsiteLeadsPage /> },
+          { path: 'zippycash/leads/:id', element: <WebsiteLeadView /> },
+          { path: 'zippycash/leads/:id/edit', element: <WebsiteLeadEdit /> },
+          { path: 'zippycash/ach', element: <WebsiteAchPage /> },
+          { path: 'zippycash/ach/:id', element: <WebsiteAchView /> },
+          { path: 'zippycash/ach/:id/edit', element: <WebsiteAchEdit /> },
           { path: '*', element: <Navigate to="/auth/404" /> },
         ],
       },

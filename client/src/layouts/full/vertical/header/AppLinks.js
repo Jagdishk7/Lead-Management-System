@@ -1,6 +1,6 @@
 import { Avatar, Box, Typography, Grid2 as Grid, Stack } from '@mui/material';
 import * as dropdownData from './data';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import React from 'react';
 
 const AppLinks = () => {

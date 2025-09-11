@@ -1,6 +1,6 @@
 import React from 'react';
 import Menuitems from './MenuItems';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import { Box, List, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';

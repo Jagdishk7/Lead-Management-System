@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 // third-party
 import { format } from 'date-fns';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
   CardContent,

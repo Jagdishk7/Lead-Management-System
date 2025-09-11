@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 // mui imports
 import { ListItemIcon, ListItem, Collapse, styled, ListItemText, useTheme } from '@mui/material';
 

@@ -19,7 +19,10 @@ http.interceptors.response.use(
     const { config, response } = error || {};
     if (!response) return Promise.reject(error);
     const originalRequest = config;
-    if (response.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/login')) {
+    // Avoid infinite loop: do not try to refresh for refresh/me endpoints
+    const isLogin = originalRequest.url.includes('/auth/login');
+    const isRefresh = originalRequest.url.includes('/auth/refresh');
+    if (response.status === 401 && !originalRequest._retry && !isLogin && !isRefresh) {
       if (isRefreshing) {
         return new Promise((resolve) => {
           pending.push(() => resolve(http(originalRequest)));
@@ -42,4 +45,3 @@ http.interceptors.response.use(
 );
 
 export default http;
-

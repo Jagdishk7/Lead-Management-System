@@ -14,7 +14,7 @@ import {
   CardMedia,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   fetchProducts,

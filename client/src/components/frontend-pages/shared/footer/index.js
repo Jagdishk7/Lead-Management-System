@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Container, Divider, Stack, Tooltip } from '@mui/material';
-import { Link, NavLink } from 'react-router';
+import { Link, NavLink } from 'react-router-dom';
 import Grid from '@mui/material/Grid2';
 
 import IconFacebook from 'src/assets/images/frontend-pages/icons/icon-facebook.svg';

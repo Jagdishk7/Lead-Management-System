@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 // mui imports
 import { ListItemIcon, ListItem, List, styled, ListItemText, useTheme } from '@mui/material';
 import { useSelector } from 'react-redux';

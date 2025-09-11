@@ -32,7 +32,7 @@ import { IconDotsVertical, IconFilter, IconSearch, IconTrash } from '@tabler/ico
 
 import LeadFilterModal from '../leads/components/LeadFilterModal';
 import LeadActionMenu from '../leads/components/LeadActionMenu';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;

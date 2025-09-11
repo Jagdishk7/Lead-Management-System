@@ -55,17 +55,17 @@ const Header = () => {
         <Search />
         {lgUp ? (
           <>
-            <Navigation />
+            {/* <Navigation /> */}
           </>
         ) : null}
 
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          <Language />
+          {/* <Language /> */}
           {/* ------------------------------------------- */}
           {/* Ecommerce Dropdown */}
           {/* ------------------------------------------- */}
-          <Cart />
+          {/* <Cart /> */}
           {/* ------------------------------------------- */}
           {/* End Ecommerce Dropdown */}
           {/* ------------------------------------------- */}
@@ -77,7 +77,7 @@ const Header = () => {
             )}
           </IconButton>
 
-          <Notifications />
+          {/* <Notifications /> */}
           {/* ------------------------------------------- */}
           {/* Toggle Right Sidebar for mobile */}
           {/* ------------------------------------------- */}

@@ -39,7 +39,7 @@ import {
 
 import LeadFilterModal from './components/LeadFilterModal';
 import LeadActionMenu from './components/LeadActionMenu';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 // -------- helpers: sorting ----------
 function descendingComparator(a, b, orderBy) {

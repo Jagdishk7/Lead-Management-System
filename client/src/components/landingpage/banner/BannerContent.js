@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography, Box, Button, Stack, styled, useMediaQuery } from '@mui/material';
 import { IconRocket } from '@tabler/icons';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 // third party
 import { motion } from 'framer-motion';
 

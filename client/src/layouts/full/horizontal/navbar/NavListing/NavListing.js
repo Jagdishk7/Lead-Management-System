@@ -1,6 +1,6 @@
 import React from 'react';
 import Menudata from '../Menudata';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import { Box, List, useMediaQuery } from '@mui/material';
 import { useSelector } from 'react-redux';
 import NavItem from '../NavItem/NavItem';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid2 as Grid, Typography, Box, Breadcrumbs, Link } from '@mui/material';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 
 import breadcrumbImg from 'src/assets/images/breadcrumb/ChatBc.png';
 import { IconCircle } from '@tabler/icons-react';

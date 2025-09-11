@@ -3,7 +3,7 @@ import { Box, Avatar, Typography, IconButton, Tooltip, useMediaQuery } from '@mu
 import { useSelector } from 'react-redux';
 import img1 from 'src/assets/images/profile/user-1.jpg';
 import { IconPower } from '@tabler/icons-react';
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export const Profile = () => {
   const customizer = useSelector((state) => state.customizer);

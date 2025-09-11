@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 // mui imports
 import { ListItemIcon, ListItem, styled, ListItemText, Box } from '@mui/material';
 import { useSelector } from 'react-redux';
