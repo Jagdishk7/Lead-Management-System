@@ -36,6 +36,7 @@ const LeadSchema = new mongoose.Schema(
         bank_name: { type: String, trim: true },
         routing_number: { type: String, trim: true },
         account_number: { type: String, trim: true },
+        status: { type: String, trim: true, index: true, enum: ['new', 'contacted', 'qualified', 'unqualified', 'converted', 'rejected'] }, // e.g., new, contacted, qualified, unqualified, converted, rejected
         // legacy: kept for backward compatibility
         sitename: { type: String, trim: true, index: true } // source site/landing page
     },

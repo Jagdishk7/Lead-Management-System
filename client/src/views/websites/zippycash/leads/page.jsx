@@ -3,28 +3,17 @@ import PageContainer from 'src/components/container/PageContainer';
 import ZippyLeadsTable from 'src/components/websites/zippycash/leads/page';
 
 const BCrumb = [
-    {
-        to: "/",
-        title: "Home",
-    },
-    {
-        to: "/zippycash/leads",
-        title: "Zippy Cash - Primary Leads",
-    },
-   
+  { to: '/', title: 'Home' },
+  { to: '/zippycash/leads', title: 'Zippy Cash - Primary Leads' },
 ];
-function page() {
-    return (
-      <>
-        <PageContainer
-          title="Zippy Cash - Primary Leads"
-          description="this is Lead Management page"
-        >
-          <Breadcrumb title="Primary Leads" items={BCrumb} />
-          <ZippyLeadsTable />
-        </PageContainer>
-      </>
-    );
+
+function Page() {
+  return (
+    <PageContainer title="Zippy Cash - Primary Leads" description="Primary leads for Zippy Cash">
+      <Breadcrumb title="Primary Leads" items={BCrumb} />
+      <ZippyLeadsTable />
+    </PageContainer>
+  );
 }
 
-export default page;
+export default Page;

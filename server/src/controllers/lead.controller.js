@@ -18,6 +18,8 @@ async function create(req, res, next) {
 async function list(req, res, next) {
   try {
     const page = parseInt(req.query.page || "1", 10);
+    // explain below line
+    
     const limit = Math.min(parseInt(req.query.limit || "20", 10), 200);
     const q = req.query.q;
     const {

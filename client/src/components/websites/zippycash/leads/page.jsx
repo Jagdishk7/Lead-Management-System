@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
-import { format, isBefore, isAfter } from 'date-fns';
+import { format } from 'date-fns';
 import {
   Box,
   Table,
@@ -20,28 +20,24 @@ import {
   TextField,
   InputAdornment,
   Paper,
-  Button,
   Stack,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 
-import ProductsData from './ProductsData';
 import CustomCheckbox from '../../../forms/theme-elements/CustomCheckbox';
 import CustomSwitch from '../../../forms/theme-elements/CustomSwitch';
 import {
   IconDotsVertical,
   IconFilter,
   IconSearch,
-  IconTrash,
-  IconEye,
-  IconPencil,
 } from '@tabler/icons';
 
 import LeadFilterModal from './components/LeadFilterModal';
 import LeadActionMenu from './components/LeadActionMenu';
 import { useNavigate } from 'react-router-dom';
+import useZippyLeadsTable from './useZippyLeadsTable';
 
-// -------- helpers: sorting ----------
+// -------- helpers: sorting (client-side on current page only) ----------
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
@@ -79,14 +75,14 @@ function LeadTableHead({ onSelectAllClick, order, orderBy, numSelected, rowCount
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
+        {/* <TableCell padding="checkbox">
           <CustomCheckbox
             color="primary"
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputprops={{ 'aria-label': 'select all rows' }}
           />
-        </TableCell>
+        </TableCell> */}
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
@@ -164,13 +160,7 @@ function LeadToolbar({ numSelected, search, handleSearch, onOpenFilter }) {
         sx={{ minWidth: 280 }}
       />
 
-      {numSelected > 0 ? (
-        <Tooltip title="Delete selected">
-          <IconButton>
-            <IconTrash width="18" />
-          </IconButton>
-        </Tooltip>
-      ) : (
+      {numSelected > 0 ? null : (
         <Tooltip title="Open filters">
           <IconButton onClick={onOpenFilter}>
             <IconFilter size="1.2rem" />
@@ -181,158 +171,36 @@ function LeadToolbar({ numSelected, search, handleSearch, onOpenFilter }) {
   );
 }
 
+// Debounce hook for search
+function useDebounced(value, delay = 500) {
+  const [debounced, setDebounced] = React.useState(value);
+  React.useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
 export default function LeadTable() {
   const navigate = useNavigate();
-
-  // table state
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('name');
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(true);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  // data
-  const originalRows = React.useMemo(
-    () =>
-      (ProductsData || []).map((r) => ({
-        ...r,
-        name:
-          (r.first_name || r.last_name)
-            ? `${r.first_name || ''} ${r.last_name || ''}`.trim()
-            : r.title || '',
-        amount: r.loan_amount ?? r.price ?? '',
-      })),
-    [],
-  );
-  const [rows, setRows] = React.useState(originalRows);
-  const [search, setSearch] = React.useState('');
-
-  // categories for filter modal
-  const categories = React.useMemo(() => {
-    const set = new Set(originalRows.map((r) => r.category).filter(Boolean));
-    return ['all', ...Array.from(set)];
-  }, [originalRows]);
-
-  // filter modal
-  const [filterOpen, setFilterOpen] = React.useState(false);
-  const [filters, setFilters] = React.useState({
-    status: 'all',
-    category: 'all',
-    range: 'all',
-    dateFrom: '',
-    dateTo: '',
-    minPrice: '',
-    maxPrice: '',
-  });
-
-  // action popover
-  const [actionAnchor, setActionAnchor] = React.useState(null);
-  const [actionRow, setActionRow] = React.useState(null);
-  const actionOpen = Boolean(actionAnchor);
-
-  // -------------- search + filters --------------
-  const applyFilters = React.useCallback(
-    (baseRows, searchText, f) => {
-      const s = (searchText || '').toLowerCase().trim();
-      const { status, category, dateFrom, dateTo, minPrice, maxPrice } = f;
-
-      return baseRows.filter((row) => {
-        const hay = `${row.name ?? ''} ${row.email ?? ''} ${row.phone ?? ''} ${row.state ?? ''} ${row.zip ?? ''}`.toLowerCase();
-        if (s && !hay.includes(s)) return false;
-
-        if (status === 'instock' && !row.stock) return false;
-        if (status === 'outofstock' && row.stock) return false;
-        if (category !== 'all' && row.category !== category) return false;
-
-        if (dateFrom) {
-          const from = new Date(dateFrom);
-          if (isBefore(row.created ? new Date(row.created) : new Date(0), from)) return false;
-        }
-        if (dateTo) {
-          const to = new Date(dateTo);
-          if (isAfter(row.created ? new Date(row.created) : new Date(0), to)) return false;
-        }
-
-        const p = Number(row.amount ?? 0);
-        if (filters.minPrice !== '' && p < Number(minPrice)) return false;
-        if (filters.maxPrice !== '' && p > Number(maxPrice)) return false;
-
-        return true;
-      });
-    },
-    [filters.minPrice, filters.maxPrice],
-  );
-
-  const handleSearch = (event) => {
-    const val = event.target.value;
-    setSearch(val);
-    setPage(0);
-    setRows(applyFilters(originalRows, val, filters));
-  };
-
-  const openFilter = () => setFilterOpen(true);
-  const closeFilter = () => setFilterOpen(false);
-  const resetFilters = () => {
-    const f = {
-      status: 'all',
-      category: 'all',
-      range: 'all',
-      dateFrom: '',
-      dateTo: '',
-      minPrice: '',
-      maxPrice: '',
-    };
-    setFilters(f);
-    setSearch('');
-    setRows(originalRows);
-    setPage(0);
-  };
-  const applyFilterAndClose = () => {
-    setRows(applyFilters(originalRows, search, filters));
-    setPage(0);
-    closeFilter();
-  };
-
-  // -------------- sorting / selection --------------
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.title);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-  const handleRowSelect = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-    if (selectedIndex === -1) newSelected = newSelected.concat(selected, name);
-    else if (selectedIndex === 0) newSelected = newSelected.concat(selected.slice(1));
-    else if (selectedIndex === selected.length - 1)
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    else if (selectedIndex > 0)
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    setSelected(newSelected);
-  };
-  const handleChangePage = (event, newPage) => setPage(newPage);
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-  const handleChangeDense = (event) => setDense(event.target.checked);
-  const isSelected = (name) => selected.indexOf(name) !== -1;
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  const {
+    // data
+    rows, total, loading, error,
+    // sorting
+    order, orderBy, handleRequestSort,
+    // selection
+    selected, handleSelectAllClick, handleRowSelect,
+    // paging & density
+    page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, dense, handleChangeDense,
+    // search
+    search, handleSearch,
+    // filters
+    filterOpen, openFilter, closeFilter, resetFilters, applyFilterAndClose, filters, setFilters, categories,
+  } = useZippyLeadsTable({ websiteCode: 'zippy_cash' });
+  const isSelected = (id) => selected.indexOf(id) !== -1;
 
   // -------------- actions --------------
-  const idOf = (r) => r.id ?? r.slug ?? r.title ?? r.name; // fallback id
+  const idOf = (r) => r._id;
   const handleView = (e, r) => {
     e.stopPropagation();
     navigate(`/zippycash/leads/${encodeURIComponent(idOf(r))}`);
@@ -341,26 +209,13 @@ export default function LeadTable() {
     e.stopPropagation();
     navigate(`/zippycash/leads/${encodeURIComponent(idOf(r))}/edit`);
   };
-  const handleDelete = (e, r) => {
-    e.stopPropagation();
-    const ok = window.confirm('Delete this record?');
-    if (ok) {
-      // TODO: replace with API DELETE(`/leads/${id}`)
-      setRows((prev) => prev.filter((x) => idOf(x) !== idOf(r)));
-      setSelected((prev) => prev.filter((t) => t !== (r.name || r.title)));
-    }
-    closeActionMenu();
-  };
+  const [actionAnchor, setActionAnchor] = React.useState(null);
+  const [actionRow, setActionRow] = React.useState(null);
+  const actionOpen = Boolean(actionAnchor);
+  const openActionMenu = (e, r) => { e.stopPropagation(); setActionAnchor(e.currentTarget); setActionRow(r); };
+  const closeActionMenu = () => { setActionAnchor(null); setActionRow(null); };
 
-  const openActionMenu = (e, r) => {
-    e.stopPropagation();
-    setActionAnchor(e.currentTarget);
-    setActionRow(r);
-  };
-  const closeActionMenu = () => {
-    setActionAnchor(null);
-    setActionRow(null);
-  };
+  // No client-side emptyRows calculation needed with server-side pagination
 
   return (
     <Box>
@@ -388,83 +243,63 @@ export default function LeadTable() {
               rowCount={rows.length}
             />
             <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
-                  const labelId = `enhanced-table-checkbox-${index}`;
-
-                  return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleRowSelect(event, row.name)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={idOf(row)}
-                      selected={isItemSelected}
-                    >
-                      <TableCell padding="checkbox">
-                        <CustomCheckbox
-                          color="primary"
-                          checked={isItemSelected}
-                          inputprops={{ 'aria-labelledby': labelId }}
-                        />
-                      </TableCell>
-
-                      <TableCell>
-                        <Typography variant="subtitle1" fontWeight={600}>{row.name || '—'}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>{row.email || '—'}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>{row.phone || '—'}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>{row.state || '—'}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>{row.zip || '—'}</Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography fontWeight={600}>${row.amount ?? 0}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>{row.created ? format(new Date(row.created), 'E, MMM d yyyy') : '—'}</Typography>
-                      </TableCell>
-
-                      <TableCell>
-                        <Stack direction="row" spacing={0.5}>
-                          {/* <Tooltip title="View">
-                            <IconButton size="small" onClick={(e) => handleView(e, row)}>
-                              <IconEye size="1.05rem" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Edit">
-                            <IconButton size="small" onClick={(e) => handleEdit(e, row)}>
-                              <IconPencil size="1.05rem" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton size="small" onClick={(e) => handleDelete(e, row)}>
-                              <IconTrash size="1.05rem" />
-                            </IconButton>
-                          </Tooltip> */}
-
-                          {/* Three-dot click menu (Popover) */}
+              {loading ? (
+                <TableRow><TableCell colSpan={9}>Loading…</TableCell></TableRow>
+              ) : error ? (
+                <TableRow><TableCell colSpan={9} style={{ color: 'red' }}>{error}</TableCell></TableRow>
+              ) : rows.length === 0 ? (
+                <TableRow><TableCell colSpan={9}>No leads found</TableCell></TableRow>
+              ) : (
+                stableSort(rows, getComparator(order, orderBy))
+                  .map((row) => {
+                    const isItemSelected = isSelected(row._id);
+                    const labelId = `enhanced-table-checkbox-${row._id}`;
+                    return (
+                      <TableRow
+                        hover
+                        onClick={(event) => handleRowSelect(event, row._id)}
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row._id}
+                        selected={isItemSelected}
+                      >
+                        {/* <TableCell padding="checkbox">
+                          <CustomCheckbox
+                            color="primary"
+                            checked={isItemSelected}
+                            inputprops={{ 'aria-labelledby': labelId }}
+                          />
+                        </TableCell> */}
+                        <TableCell>
+                          <Typography variant="subtitle1" fontWeight={600}>{row.name || '—'}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography>{row.email || '—'}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography>{row.phone || '—'}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography>{row.state || '—'}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography>{row.zip || '—'}</Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography fontWeight={600}>${row.amount ?? 0}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography>{row.created ? format(new Date(row.created), 'E, MMM d yyyy') : '—'}</Typography>
+                        </TableCell>
+                        <TableCell>
                           <IconButton size="small" onClick={(e) => openActionMenu(e, row)}>
                             <IconDotsVertical size="1.1rem" />
                           </IconButton>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
               )}
             </TableBody>
           </Table>
@@ -473,7 +308,7 @@ export default function LeadTable() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
           component="div"
-          count={rows.length}
+          count={total}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -491,7 +326,7 @@ export default function LeadTable() {
       {/* Filter Modal */}
       <LeadFilterModal
         open={filterOpen}
-        onClose={() => setFilterOpen(false)}
+        onClose={closeFilter}
         onApply={applyFilterAndClose}
         onReset={resetFilters}
         categories={categories}
@@ -504,15 +339,9 @@ export default function LeadTable() {
         open={actionOpen}
         anchorEl={actionAnchor}
         onClose={closeActionMenu}
-        onView={(e) => {
-          if (actionRow) handleView(e || new Event('click'), actionRow);
-        }}
-        onEdit={(e) => {
-          if (actionRow) handleEdit(e || new Event('click'), actionRow);
-        }}
-        onDelete={(e) => {
-          if (actionRow) handleDelete(e || new Event('click'), actionRow);
-        }}
+        onView={(e) => { if (actionRow) handleView(e || new Event('click'), actionRow); }}
+        onEdit={(e) => { if (actionRow) handleEdit(e || new Event('click'), actionRow); }}
+        onDelete={() => { /* TODO: call DELETE /leads/:id */ closeActionMenu(); }}
       />
     </Box>
   );
